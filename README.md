@@ -1,6 +1,6 @@
 # Croseus Gene Search Tool
 
-A comprehensive web-based tool for searching and analyzing Croseus genes across multiple versions.
+A comprehensive web-based tool for searching and analyzing Catharanthus roseus genes across multiple versions.
 
 ## Features
 
@@ -12,8 +12,8 @@ A comprehensive web-based tool for searching and analyzing Croseus genes across 
 
 ## Available Versions
 
-- **Cr_NP**: Canonical (NP) version
-- **Cr_NCB**: NCB version  
+- **Cr_NP**: Canonical (NP) version (Sun, S. et al. Single-cell RNA sequencing provides a high-resolution roadmap for understanding the multicellular compartmentation of specialized metabolism. Nat. Plants 9, 179–190 (2023). https://doi.org/10.1038/s41477-022-01291-y)
+- **Cr_NCB**: (Li, C.. Single-cell multi-omics in the medicinal plant Catharanthus roseus. Nat Chem Biol 19, 1031–1041 (2023). https://doi.org/10.1038/s41589-023-01327-0)
 - **Cr_2023**: 2023 version
 - **Cr_2022**: 2022 version
 - **Cr_2016**: 2016 version
@@ -146,8 +146,9 @@ If you use this tool in your research, please cite:
 
 ```
 Croseus Gene Search Tool
-[Your Institution/Name]
-[Year]
+Ruiqing Lyu
+KTRDC, University of Kentucky
+2026
 Available at: https://github.com/[username]/croseus-gene-search-tool
 ```
 

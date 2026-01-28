@@ -149,7 +149,7 @@ Croseus Gene Search Tool
 Ruiqing Lyu
 KTRDC, University of Kentucky
 2026
-Available at: https://github.com/[username]/croseus-gene-search-tool
+Available at: https://github.com/rqlyu/croseus-gene-search-tool
 ```
 
 ## Contact

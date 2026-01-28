@@ -20,7 +20,7 @@ python server.py
 ```
 
 ### 4. Open Browser
-Navigate to: http://localhost:5000
+Navigate to: https://rqlyu.github.io/search_croseus_information/
 
 ## 📦 What's Included
 
@@ -38,35 +38,15 @@ Navigate to: http://localhost:5000
 - **`requirements.txt`** - Python dependencies
 - **`sample_genes.txt`** - Example gene list
 
-## 📋 Required Input Files
-
-Place these files in the same directory:
-- `Cr_Annotations_Eggo.xlsx` - Gene annotations
-- `Croseus_GO_NP.xlsx` - GO term annotations  
-- `Cr_NP.fasta` - Protein sequences
-- `Cr_NP_cds.fasta` - CDS sequences
-- `id_mapping.csv` - ID mappings (optional)
-
 ## 💡 Features
 
 ### Web Interface
-✅ Search genes by name, ID, or keyword
+✅ Search genes by name, ID, protein sequence, or keyword
 ✅ View protein and CDS sequences
 ✅ Select multiple genes with checkboxes
 ✅ Run GO enrichment analysis
-✅ Interactive bar chart results
 
-### Command Line Tool
-```bash
-# Run GO enrichment on gene list
-python go_analysis_cli.py sample_genes.txt
 
-# With custom parameters
-python go_analysis_cli.py sample_genes.txt --pvalue 0.01 --plot results.png
-
-# From command line
-python go_analysis_cli.py --genes M9H77_13438,M9H77_32446
-```
 
 ## 📊 Example Usage
 
@@ -131,33 +111,5 @@ See `GO_ENRICHMENT_GUIDE.md` for:
 ├── GO_ENRICHMENT_GUIDE.md     # Full guide
 └── README.md                  # This file
 ```
-
-## 🐛 Troubleshooting
-
-**"GO annotations not loaded"**
-- Check that `Croseus_GO_NP.xlsx` exists
-- Restart the server
-
-**"No significant enrichment"**
-- Need ≥2 genes
-- Try relaxing p-value cutoffs
-- Select genes with related functions
-
-**Server won't start**
-- Install missing packages: `pip install -r requirements.txt`
-- Check Python version: `python --version` (need 3.7+)
-
-## 🎯 Tips for Best Results
-
-1. Select 10-100 related genes
-2. Use genes from same pathway/family
-3. Check p.adjust < 0.05 for significance
-4. Compare across ontologies (BP/MF/CC)
-
-## 📞 Support
-
-See troubleshooting section in `GO_ENRICHMENT_GUIDE.md`
-
----
 
 **Happy Analyzing! 🧬🔬✨**

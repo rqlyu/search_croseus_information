@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C. roseus Gene Database with GO Enrichment</title>
+    <title>C. roseus Gene Database</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background-color: #f4f6f9; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
         
         /* Header */
         .header {
@@ -20,16 +23,51 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
-        /* Search Card */
-        .search-card {
-            background: white;
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
-            padding: 2rem;
+        /* Tab Navigation */
+        .nav-tabs-custom {
+            border-bottom: 3px solid #764ba2;
             margin-bottom: 2rem;
         }
         
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            background: transparent;
+        }
+        
+        .nav-tabs-custom .nav-link:hover {
+            color: #764ba2;
+            border-color: transparent;
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+            color: #764ba2;
+            background: white;
+            border: none;
+            border-bottom: 3px solid #764ba2;
+            margin-bottom: -3px;
+        }
+        
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 3px solid #dc3545;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        /* Search Section */
         .form-control-lg {
             border-radius: 10px;
             padding: 1rem;
@@ -46,30 +84,39 @@
             border-radius: 10px;
             padding: 0 2.5rem;
             font-weight: 600;
+            border: none;
         }
-        .btn-search:hover { background-color: #5b3a7d; color: white; }
+        .btn-search:hover { 
+            background-color: #5b3a7d; 
+            color: white; 
+        }
         
-        /* GO Enrichment Button */
-        .go-enrichment-bar {
+        /* GO Enrichment Section */
+        .btn-go-analyze {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
-            padding: 1rem;
+            border: none;
             border-radius: 10px;
-            margin-bottom: 1rem;
-            display: none;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .btn-go-analyze:hover {
+            opacity: 0.9;
+            color: white;
         }
         
-        .btn-go-enrich {
-            background-color: white;
-            color: #f5576c;
-            border: none;
-            border-radius: 8px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 600;
+        /* Textarea for gene input */
+        .gene-input-area {
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
         }
-        .btn-go-enrich:hover {
-            background-color: #fff5f5;
-            color: #f5576c;
+        .gene-input-area:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 0.25rem rgba(118, 75, 162, 0.1);
         }
 
         /* Results Table */
@@ -78,7 +125,7 @@
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             overflow: hidden;
-            border: none;
+            border: 3px solid #dc3545;
         }
         
         .table thead th {
@@ -94,13 +141,6 @@
             padding: 0.9rem; 
             vertical-align: middle;
             font-size: 0.9em;
-        }
-        
-        /* Checkbox styling */
-        .gene-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
         }
         
         /* Gene Name Badge */
@@ -159,7 +199,6 @@
             overflow-y: auto;
         }
         
-        /* Tabs */
         .seq-tabs {
             display: flex;
             gap: 10px;
@@ -195,13 +234,13 @@
             font-size: 0.85em;
         }
         
-        /* GO Enrichment Results Modal */
-        .go-results-card {
+        /* GO Results */
+        .go-results-section {
             background: white;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             padding: 2rem;
-            margin-top: 2rem;
+            border: 3px solid #dc3545;
             display: none;
         }
         
@@ -261,13 +300,6 @@
             border-radius: 3px;
             font-weight: 600;
         }
-        
-        /* Loading spinner */
-        .spinner-border-sm {
-            width: 1rem;
-            height: 1rem;
-            border-width: 0.15em;
-        }
     </style>
 </head>
 <body>
@@ -275,100 +307,149 @@
     <div class="header text-center">
         <div class="container">
             <h1 class="display-4 fw-bold"><i class="fas fa-dna me-3"></i>C. roseus Genome Database</h1>
-            <p class="lead opacity-80">Search, Select, and Analyze Gene Functions</p>
+            <p class="lead opacity-80">Search Genes & Perform GO Enrichment Analysis</p>
         </div>
     </div>
 
     <div class="container">
-        <!-- Search Card -->
-        <div class="search-card">
-            <div class="row g-3">
-                <div class="col-md-9">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control form-control-lg border-start-0" id="searchInput" 
-                               placeholder="Enter Gene Name (CrWRKY7), ID (M9H77...), or keyword...">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search-panel" type="button" role="tab">
+                    <i class="fas fa-search me-2"></i>Search Genes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="go-tab" data-bs-toggle="tab" data-bs-target="#go-panel" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-2"></i>GO Enrichment Analysis
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- SEARCH PANEL -->
+            <div class="tab-pane fade show active" id="search-panel" role="tabpanel">
+                <!-- Search Genes Section -->
+                <div class="section-card">
+                    <h2 class="section-title"><i class="fas fa-search me-2"></i>Search genes</h2>
+                    <div class="row g-3">
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" class="form-control form-control-lg border-start-0" id="searchInput" 
+                                       placeholder="Enter Gene Name (CrWRKY7), ID (M9H77...), or keyword...">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-grid">
+                            <button class="btn btn-search btn-lg" onclick="performSearch()">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <strong>Search tips:</strong> Gene names (CrWRKY7), IDs (M9H77_13438), or keywords
+                        </small>
+                    </div>
+                    <div id="searchStatus" class="mt-2 text-muted small">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Loading database...
                     </div>
                 </div>
-                <div class="col-md-3 d-grid">
-                    <button class="btn btn-search btn-lg" onclick="performSearch()">Search</button>
+
+                <!-- Search Results Section -->
+                <div class="table-card">
+                    <div class="p-3 bg-light border-bottom">
+                        <h2 class="section-title mb-0"><i class="fas fa-list me-2"></i>Search results</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 12%">Gene ID</th>
+                                    <th style="width: 12%">Gene Name</th>
+                                    <th style="width: 30%">Description</th>
+                                    <th style="width: 18%">Other IDs</th>
+                                    <th style="width: 18%">Details</th>
+                                    <th style="width: 10%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="searchTableBody">
+                                <tr><td colspan="6" class="text-center py-5 text-muted">Enter a search term above to begin.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="mt-3">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    <strong>Search tips:</strong> Gene names (CrWRKY7), IDs (M9H77_13438), or keywords
-                </small>
-            </div>
-            <div id="status" class="mt-2 text-muted small"><i class="fas fa-spinner fa-spin me-2"></i>Loading database...</div>
-        </div>
 
-        <!-- GO Enrichment Bar (Hidden by default) -->
-        <div class="go-enrichment-bar" id="goEnrichBar">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="fas fa-check-circle me-2"></i>
-                    <strong><span id="selectedCount">0</span> genes selected</strong>
-                    <span class="ms-3 opacity-75">Run GO enrichment to find overrepresented biological functions</span>
+            <!-- GO ENRICHMENT PANEL -->
+            <div class="tab-pane fade" id="go-panel" role="tabpanel">
+                <!-- Input List Section -->
+                <div class="section-card">
+                    <h2 class="section-title"><i class="fas fa-list-ul me-2"></i>Input list of genes</h2>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Enter Gene IDs (one per line):</label>
+                        <textarea class="form-control gene-input-area" id="geneListInput" 
+                                  placeholder="M9H77_13438
+M9H77_32446
+M9H77_01367
+M9H77_05742
+M9H77_33525
+..."></textarea>
+                        <div class="mt-2 text-muted small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Paste your gene IDs here, one per line. You can also upload a file.
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Upload Gene List File</label>
+                            <input type="file" class="form-control" id="geneFileInput" accept=".txt,.csv">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">P-value Cutoff</label>
+                            <input type="number" class="form-control" id="pvalueCutoff" value="0.05" step="0.01" min="0" max="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Adjusted P-value Cutoff</label>
+                            <input type="number" class="form-control" id="qvalueCutoff" value="0.2" step="0.01" min="0" max="1">
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button class="btn btn-go-analyze" onclick="runGOAnalysis()">
+                                <i class="fas fa-play me-2"></i>Analyze
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="goInputStatus" class="mt-3"></div>
                 </div>
-                <div>
-                    <button class="btn btn-go-enrich me-2" onclick="runGOEnrichment()">
-                        <i class="fas fa-chart-bar me-2"></i>Run GO Enrichment
-                    </button>
-                    <button class="btn btn-light btn-sm" onclick="clearSelection()">
-                        <i class="fas fa-times me-1"></i>Clear
-                    </button>
+
+                <!-- GO Enrichment Results Section -->
+                <div class="go-results-section" id="goResultsSection">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="section-title mb-0"><i class="fas fa-chart-bar me-2"></i>GO enrichment result</h2>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearGOResults()">
+                            <i class="fas fa-times me-1"></i>Clear
+                        </button>
+                    </div>
+                    <div id="goResultsContent">
+                        <!-- Results will be inserted here -->
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Results Table -->
-        <div class="table-card">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width: 3%">
-                                <input type="checkbox" id="selectAll" class="gene-checkbox" onchange="toggleSelectAll()">
-                            </th>
-                            <th style="width: 11%">Gene ID</th>
-                            <th style="width: 11%">Gene Name</th>
-                            <th style="width: 28%">Description</th>
-                            <th style="width: 16%">Other IDs</th>
-                            <th style="width: 16%">Details</th>
-                            <th style="width: 10%">GO</th>
-                            <th style="width: 5%">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="8" class="text-center py-5 text-muted">Enter a search term above to begin.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- GO Enrichment Results (Hidden by default) -->
-        <div class="go-results-card" id="goResultsCard">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4><i class="fas fa-chart-bar me-2"></i>GO Enrichment Results</h4>
-                <button class="btn btn-sm btn-outline-secondary" onclick="closeGOResults()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="goResultsContent">
-                <!-- Results will be inserted here -->
             </div>
         </div>
         
         <footer class="text-center mt-5 mb-5 text-muted small">
-            &copy; 2025 Catharanthus roseus Genome Database with GO Enrichment
+            &copy; 2025 Catharanthus roseus Genome Database
         </footer>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let db = [];
-        let selectedGenes = new Set();
-        const statusDiv = document.getElementById('status');
+        const searchStatus = document.getElementById('searchStatus');
         const searchInput = document.getElementById('searchInput');
 
         // 1. Load the Data
@@ -376,18 +457,18 @@
             .then(res => res.json())
             .then(data => {
                 db = data;
-                statusDiv.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>Database loaded: <strong>${db.length.toLocaleString()}</strong> genes ready.`;
+                searchStatus.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>Database loaded: <strong>${db.length.toLocaleString()}</strong> genes ready.`;
                 console.log('Sample record:', db[0]);
             })
             .catch(err => {
                 console.error(err);
-                statusDiv.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading 'data.json'.</span>`;
+                searchStatus.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading 'data.json'.</span>`;
             });
 
         // 2. Search Function
         function performSearch() {
             const query = searchInput.value.toLowerCase().trim();
-            const tbody = document.getElementById('tableBody');
+            const tbody = document.getElementById('searchTableBody');
             
             if (!query || query.length < 2) {
                 alert("Please enter at least 2 characters.");
@@ -407,11 +488,11 @@
                 return combinedText.includes(query);
             });
 
-            statusDiv.innerHTML = `<i class="fas fa-list me-2"></i>Found <strong>${results.length}</strong> ${results.length === 1 ? 'match' : 'matches'}`;
+            searchStatus.innerHTML = `<i class="fas fa-list me-2"></i>Found <strong>${results.length}</strong> ${results.length === 1 ? 'match' : 'matches'}`;
             tbody.innerHTML = '';
 
             if (results.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">
                     <i class="fas fa-search mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
                     <br>No results found.
                 </td></tr>`;
@@ -442,48 +523,32 @@
                     detailsHtml += `<span class="badge-info">${item.Percent_Identity}%</span> `;
                 }
                 if (!detailsHtml) detailsHtml = '<span class="text-muted small">-</span>';
-                
-                const goCount = item.GO_count || 0;
-                const goBadge = goCount > 0 
-                    ? `<span class="badge-go"><i class="fas fa-tag me-1"></i>${goCount} terms</span>`
-                    : '<span class="text-muted small">-</span>';
 
                 const tr = document.createElement('tr');
-                const isChecked = selectedGenes.has(item.Gene_ID);
                 tr.innerHTML = `
-                    <td>
-                        <input type="checkbox" class="gene-checkbox" 
-                               data-gene-id="${escapeHtml(item.Gene_ID)}"
-                               ${isChecked ? 'checked' : ''}
-                               onchange="toggleGeneSelection('${escapeHtml(item.Gene_ID)}')">
-                    </td>
                     <td class="fw-bold text-primary">${escapeHtml(item.Gene_ID || 'N/A')}</td>
                     <td>${geneNameDisplay}</td>
                     <td>${desc}</td>
                     <td>${otherBadges}</td>
                     <td>${detailsHtml}</td>
-                    <td>${goBadge}</td>
                     <td>
-                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="toggleSeq('${escapeHtml(item.Gene_ID)}', ${index})">
-                            <i class="fas fa-dna me-1"></i>View
+                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="toggleSeq('${escapeHtml(item.Gene_ID)}')">
+                            <i class="fas fa-eye me-1"></i>View
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
 
-                // Sequence details row (same as before, omitted for brevity)
                 createSequenceRow(item, tbody);
             });
             
             if (results.length > maxResults) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="8" class="text-center py-3 text-muted">
+                tr.innerHTML = `<td colspan="6" class="text-center py-3 text-muted">
                     Showing first ${maxResults} of ${results.length} results.
                 </td>`;
                 tbody.appendChild(tr);
             }
-            
-            updateSelectAllCheckbox();
         }
 
         function createSequenceRow(item, tbody) {
@@ -513,7 +578,7 @@
             }
             
             trSeq.innerHTML = `
-                <td colspan="8">
+                <td colspan="6">
                     <div class="p-3">
                         <div class="row">
                             <div class="col-md-4">
@@ -529,24 +594,20 @@
                             <div class="col-md-8">
                                 <h6 class="text-primary mb-3"><i class="fas fa-dna me-2"></i>Sequences</h6>
                                 <div class="seq-tabs">
-                                    <button class="seq-tab active" onclick="switchSeqTab(event, 'protein-${item.Gene_ID}')">
-                                        Protein
-                                    </button>
-                                    <button class="seq-tab" onclick="switchSeqTab(event, 'cds-${item.Gene_ID}')">
-                                        CDS
-                                    </button>
+                                    <button class="seq-tab active" onclick="switchSeqTab(event, 'protein-${item.Gene_ID}')">Protein</button>
+                                    <button class="seq-tab" onclick="switchSeqTab(event, 'cds-${item.Gene_ID}')">CDS</button>
                                 </div>
                                 <div id="protein-${item.Gene_ID}" class="seq-content active">
                                     <div class="seq-stats">Length: ${proteinLen > 0 ? proteinLen + ' aa' : 'N/A'}</div>
                                     <div class="seq-box">${escapeHtml(proteinSeq)}</div>
-                                    <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(proteinSeq)}', 'Protein')">
+                                    <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(proteinSeq)}')">
                                         <i class="fas fa-copy me-1"></i> Copy
                                     </button>
                                 </div>
                                 <div id="cds-${item.Gene_ID}" class="seq-content">
                                     <div class="seq-stats">Length: ${cdsLen > 0 ? cdsLen + ' nt' : 'N/A'}</div>
                                     <div class="seq-box">${escapeHtml(cdsSeq)}</div>
-                                    <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(cdsSeq)}', 'CDS')">
+                                    <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(cdsSeq)}')">
                                         <i class="fas fa-copy me-1"></i> Copy
                                     </button>
                                 </div>
@@ -558,119 +619,100 @@
             tbody.appendChild(trSeq);
         }
 
-        // 3. Gene Selection Functions
-        function toggleGeneSelection(geneId) {
-            if (selectedGenes.has(geneId)) {
-                selectedGenes.delete(geneId);
-            } else {
-                selectedGenes.add(geneId);
+        // 3. File Upload Handler
+        document.getElementById('geneFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('geneListInput').value = event.target.result;
+                };
+                reader.readAsText(file);
             }
-            updateSelectionUI();
-        }
+        });
 
-        function toggleSelectAll() {
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.gene-checkbox:not(#selectAll)');
+        // 4. GO Enrichment Analysis
+        async function runGOAnalysis() {
+            const geneListText = document.getElementById('geneListInput').value.trim();
+            const pvalue = parseFloat(document.getElementById('pvalueCutoff').value);
+            const qvalue = parseFloat(document.getElementById('qvalueCutoff').value);
+            const statusDiv = document.getElementById('goInputStatus');
+            const resultsSection = document.getElementById('goResultsSection');
+            const resultsContent = document.getElementById('goResultsContent');
             
-            checkboxes.forEach(cb => {
-                const geneId = cb.getAttribute('data-gene-id');
-                if (selectAllCheckbox.checked) {
-                    selectedGenes.add(geneId);
-                    cb.checked = true;
-                } else {
-                    selectedGenes.delete(geneId);
-                    cb.checked = false;
-                }
-            });
-            
-            updateSelectionUI();
-        }
-
-        function updateSelectAllCheckbox() {
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.gene-checkbox:not(#selectAll)');
-            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            
-            selectAllCheckbox.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
-            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
-        }
-
-        function updateSelectionUI() {
-            const count = selectedGenes.size;
-            document.getElementById('selectedCount').textContent = count;
-            document.getElementById('goEnrichBar').style.display = count > 0 ? 'block' : 'none';
-            updateSelectAllCheckbox();
-        }
-
-        function clearSelection() {
-            selectedGenes.clear();
-            document.querySelectorAll('.gene-checkbox').forEach(cb => cb.checked = false);
-            updateSelectionUI();
-            closeGOResults();
-        }
-
-        // 4. GO Enrichment Function
-        async function runGOEnrichment() {
-            if (selectedGenes.size === 0) {
-                alert('Please select at least one gene');
+            if (!geneListText) {
+                statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Please enter a list of genes</div>';
                 return;
             }
-
-            const goResultsCard = document.getElementById('goResultsCard');
-            const goResultsContent = document.getElementById('goResultsContent');
             
-            goResultsContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Running enrichment analysis...</p></div>';
-            goResultsCard.style.display = 'block';
+            // Parse gene list
+            const genes = geneListText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line && !line.startsWith('#'));
+            
+            if (genes.length === 0) {
+                statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>No valid genes found</div>';
+                return;
+            }
+            
+            statusDiv.innerHTML = `<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Analyzing ${genes.length} genes...</div>`;
+            resultsContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Running enrichment analysis...</p></div>';
+            resultsSection.style.display = 'block';
             
             try {
                 const response = await fetch('/api/go_enrichment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        genes: Array.from(selectedGenes),
-                        pvalue_cutoff: 0.05,
-                        qvalue_cutoff: 0.2
+                        genes: genes,
+                        pvalue_cutoff: pvalue,
+                        qvalue_cutoff: qvalue
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (data.error) {
-                    goResultsContent.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>${data.error}</div>`;
+                    statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>${data.error}</div>`;
+                    resultsContent.innerHTML = `<div class="alert alert-warning">${data.error}</div>`;
                     return;
                 }
                 
-                displayGOResults(data);
+                displayGOResults(data, statusDiv);
                 
             } catch (error) {
-                goResultsContent.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>Error: ${error.message}</div>`;
+                statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>Error: ${error.message}</div>`;
+                resultsContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
             }
         }
 
-        function displayGOResults(data) {
+        function displayGOResults(data, statusDiv) {
             const content = document.getElementById('goResultsContent');
             
             if (!data.success || !data.results || data.results.length === 0) {
-                content.innerHTML = '<div class="alert alert-info">No significant enrichment found.</div>';
+                statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>No significant enrichment found</div>';
+                content.innerHTML = '<div class="alert alert-info">No significant enrichment found. Try relaxing the p-value thresholds or using more genes.</div>';
                 return;
             }
+            
+            statusDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Analysis complete! Found ${data.enriched_terms} enriched terms from ${data.tested_genes} genes.</div>`;
             
             let html = `
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle me-2"></i>
                     Found <strong>${data.enriched_terms}</strong> significantly enriched GO terms 
-                    from <strong>${data.tested_genes}</strong> genes
+                    from <strong>${data.tested_genes}</strong> genes (out of ${data.total_input} input genes)
                 </div>
                 <h5 class="mt-4 mb-3">Top Enriched Terms</h5>
             `;
             
             const maxVal = Math.max(...data.results.map(r => -Math.log10(r['p.adjust'])));
             
-            data.results.slice(0, 15).forEach(result => {
+            data.results.slice(0, 20).forEach(result => {
                 const negLogP = -Math.log10(result['p.adjust']);
                 const barWidth = (negLogP / maxVal * 100).toFixed(1);
-                const truncDesc = result.Description.length > 60 
-                    ? result.Description.substring(0, 57) + '...'
+                const truncDesc = result.Description.length > 65
+                    ? result.Description.substring(0, 62) + '...'
                     : result.Description;
                 
                 html += `
@@ -688,15 +730,18 @@
                 `;
             });
             
-            if (data.results.length > 15) {
-                html += `<p class="text-muted mt-3">... and ${data.results.length - 15} more terms</p>`;
+            if (data.results.length > 20) {
+                html += `<p class="text-muted mt-3">... and ${data.results.length - 20} more terms</p>`;
             }
             
             content.innerHTML = html;
         }
 
-        function closeGOResults() {
-            document.getElementById('goResultsCard').style.display = 'none';
+        function clearGOResults() {
+            document.getElementById('goResultsSection').style.display = 'none';
+            document.getElementById('goInputStatus').innerHTML = '';
+            document.getElementById('geneListInput').value = '';
+            document.getElementById('geneFileInput').value = '';
         }
 
         // 5. Helper Functions
@@ -718,8 +763,8 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        function copySequence(seq, type) {
-            navigator.clipboard.writeText(seq).then(() => alert(type + ' sequence copied!'));
+        function copySequence(seq) {
+            navigator.clipboard.writeText(seq).then(() => alert('Sequence copied to clipboard!'));
         }
 
         function formatEvalue(evalue) {

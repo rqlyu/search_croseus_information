@@ -120,6 +120,42 @@
             overflow-y: auto;
         }
         
+        /* Tabs for sequences */
+        .seq-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .seq-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #6c757d;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .seq-tab:hover {
+            color: #764ba2;
+        }
+        
+        .seq-tab.active {
+            color: #764ba2;
+            border-bottom-color: #764ba2;
+        }
+        
+        .seq-content {
+            display: none;
+        }
+        
+        .seq-content.active {
+            display: block;
+        }
+        
         /* Info labels */
         .info-label {
             font-weight: 600;
@@ -137,6 +173,15 @@
             padding: 2px 4px;
             border-radius: 3px;
             font-weight: 600;
+        }
+        
+        /* Sequence stats */
+        .seq-stats {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.85em;
         }
     </style>
 </head>
@@ -208,7 +253,7 @@
             .then(data => {
                 db = data;
                 statusDiv.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>Database loaded: <strong>${db.length.toLocaleString()}</strong> genes ready.`;
-                console.log('Sample record:', db[0]); // Debug: check structure
+                console.log('Sample record:', db[0]);
             })
             .catch(err => {
                 console.error(err);
@@ -307,19 +352,24 @@
                 `;
                 tbody.appendChild(tr);
 
-                // Create Details Row (Hidden) - Shows sequence and more info
+                // Create Details Row (Hidden) - Shows sequences and more info
                 const trSeq = document.createElement('tr');
                 trSeq.id = 'seq-' + item.Gene_ID;
                 trSeq.className = 'seq-row';
                 
-                const sequence = item.Sequence || 'Sequence not available';
+                const proteinSeq = item.Protein_Sequence || item.Sequence || 'Protein sequence not available';
+                const cdsSeq = item.CDS_Sequence || 'CDS sequence not available';
                 const organism = item.Organism || item.OS || 'N/A';
+                
+                // Calculate sequence lengths
+                const proteinLen = proteinSeq !== 'Protein sequence not available' ? proteinSeq.length : 0;
+                const cdsLen = cdsSeq !== 'CDS sequence not available' ? cdsSeq.length : 0;
                 
                 trSeq.innerHTML = `
                     <td colspan="6">
                         <div class="p-3">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <h6 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Gene Information</h6>
                                     <p class="mb-2"><span class="info-label">Gene ID:</span> <span class="info-value">${escapeHtml(item.Gene_ID || 'N/A')}</span></p>
                                     <p class="mb-2"><span class="info-label">Gene Name:</span> <span class="info-value">${escapeHtml(geneName)}</span></p>
@@ -330,12 +380,41 @@
                                     ${item.Hit_Accession ? `<p class="mb-2"><span class="info-label">Hit Accession:</span> <span class="info-value">${escapeHtml(item.Hit_Accession)}</span></p>` : ''}
                                     ${item.Hit_DB ? `<p class="mb-2"><span class="info-label">Database:</span> <span class="info-value">${escapeHtml(item.Hit_DB)}</span></p>` : ''}
                                 </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-primary mb-3"><i class="fas fa-dna me-2"></i>Protein Sequence</h6>
-                                    <div class="seq-box">${escapeHtml(sequence)}</div>
-                                    <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(sequence)}')">
-                                        <i class="fas fa-copy me-1"></i> Copy Sequence
-                                    </button>
+                                <div class="col-md-8">
+                                    <h6 class="text-primary mb-3"><i class="fas fa-dna me-2"></i>Sequences</h6>
+                                    
+                                    <!-- Tabs for Protein and CDS -->
+                                    <div class="seq-tabs">
+                                        <button class="seq-tab active" onclick="switchSeqTab(event, 'protein-${item.Gene_ID}')">
+                                            <i class="fas fa-microscope me-1"></i> Protein Sequence
+                                        </button>
+                                        <button class="seq-tab" onclick="switchSeqTab(event, 'cds-${item.Gene_ID}')">
+                                            <i class="fas fa-code me-1"></i> CDS Sequence
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Protein Sequence Content -->
+                                    <div id="protein-${item.Gene_ID}" class="seq-content active">
+                                        <div class="seq-stats">
+                                            <strong>Length:</strong> ${proteinLen > 0 ? proteinLen + ' amino acids' : 'N/A'}
+                                        </div>
+                                        <div class="seq-box">${escapeHtml(proteinSeq)}</div>
+                                        <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(proteinSeq)}', 'Protein')">
+                                            <i class="fas fa-copy me-1"></i> Copy Protein Sequence
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- CDS Sequence Content -->
+                                    <div id="cds-${item.Gene_ID}" class="seq-content">
+                                        <div class="seq-stats">
+                                            <strong>Length:</strong> ${cdsLen > 0 ? cdsLen + ' nucleotides' : 'N/A'}
+                                            ${cdsLen > 0 && proteinLen > 0 ? ` | <strong>Expected Protein Length:</strong> ${Math.floor(cdsLen / 3)} aa` : ''}
+                                        </div>
+                                        <div class="seq-box">${escapeHtml(cdsSeq)}</div>
+                                        <button class="btn btn-sm btn-light mt-2 border" onclick="copySequence('${escapeHtml(cdsSeq)}', 'CDS')">
+                                            <i class="fas fa-copy me-1"></i> Copy CDS Sequence
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -364,18 +443,43 @@
                 row.style.display = 'table-row';
             }
         }
+        
+        // 4. Helper: Switch between Protein and CDS tabs
+        function switchSeqTab(event, tabId) {
+            // Get the parent container
+            const container = event.target.closest('td');
+            
+            // Remove active class from all tabs in this container
+            container.querySelectorAll('.seq-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Hide all content in this container
+            container.querySelectorAll('.seq-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected content
+            const selectedContent = document.getElementById(tabId);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+        }
 
-        // 4. Helper: Copy Sequence
-        function copySequence(seq) {
+        // 5. Helper: Copy Sequence
+        function copySequence(seq, type) {
             navigator.clipboard.writeText(seq).then(() => {
-                alert('Sequence copied to clipboard!');
+                alert(type + ' sequence copied to clipboard!');
             }).catch(err => {
                 alert('Failed to copy sequence.');
                 console.error(err);
             });
         }
 
-        // 5. Helper: Format E-value
+        // 6. Helper: Format E-value
         function formatEvalue(evalue) {
             if (evalue === undefined || evalue === '') return 'N/A';
             const num = parseFloat(evalue);
@@ -385,19 +489,19 @@
             return num.toFixed(4);
         }
 
-        // 6. Helper: Escape HTML
+        // 7. Helper: Escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // 7. "Enter" Key Search
+        // 8. "Enter" Key Search
         searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') performSearch();
         });
         
-        // 8. Auto-focus on search input
+        // 9. Auto-focus on search input
         searchInput.focus();
     </script>
 </body>

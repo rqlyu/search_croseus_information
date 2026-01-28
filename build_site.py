@@ -13,6 +13,7 @@ OLD_FASTAS = [
     'Cr_2016.fasta', 
     'Cr_2022.fasta', 
     'Cr_2023.fasta', 
+    'Cr_T1.fasta', 
     'Cr_NCB.fasta'
 ]
 OUTPUT_FILE = 'data.json'

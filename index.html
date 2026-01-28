@@ -172,15 +172,6 @@
             border-radius: 5px;
             display: inline-block;
         }
-        
-        .badge-go {
-            background-color: #d4edda;
-            color: #155724;
-            font-size: 0.8em;
-            padding: 4px 8px;
-            border-radius: 5px;
-            display: inline-block;
-        }
 
         /* Sequence Viewer */
         .seq-row { display: none; background-color: #fdfdfd; }
@@ -297,6 +288,27 @@
             border-radius: 3px;
             font-weight: 600;
         }
+        
+        /* GitHub Pages notice */
+        .github-notice {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .github-notice h5 {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .github-notice code {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -382,6 +394,20 @@
 
             <!-- GO ENRICHMENT PANEL -->
             <div class="tab-pane fade" id="go-panel" role="tabpanel">
+                <!-- GitHub Pages Notice (shown only on GitHub Pages) -->
+                <div class="github-notice" id="githubNotice" style="display: none;">
+                    <h5><i class="fas fa-info-circle me-2"></i>GO Enrichment Requires Local Server</h5>
+                    <p class="mb-2">You're viewing this on GitHub Pages. GO enrichment analysis needs a Python backend server to run.</p>
+                    <p class="mb-2"><strong>To use GO enrichment:</strong></p>
+                    <ol class="mb-2">
+                        <li>Clone the repository: <code>git clone https://github.com/rqlyu/search_croseus_information.git</code></li>
+                        <li>Install dependencies: <code>pip install -r requirements.txt</code></li>
+                        <li>Start server: <code>python server.py</code></li>
+                        <li>Open in browser: <code>http://localhost:5000</code></li>
+                    </ol>
+                    <p class="mb-0"><small><i class="fas fa-lightbulb me-1"></i>The search functionality works perfectly on GitHub Pages!</small></p>
+                </div>
+                
                 <!-- Input List Section -->
                 <div class="section-card">
                     <h2 class="section-title"><i class="fas fa-list-ul me-2"></i>Input list of genes</h2>
@@ -448,10 +474,17 @@ M9H77_33525
         let db = [];
         let goAnnotations = {};
         let goLoaded = false;
+        let isGitHubPages = false;
         const searchStatus = document.getElementById('searchStatus');
         const searchInput = document.getElementById('searchInput');
 
-        // 1. Load the Gene Data (main database)
+        // Detect if running on GitHub Pages
+        if (window.location.hostname.includes('github.io')) {
+            isGitHubPages = true;
+            document.getElementById('githubNotice').style.display = 'block';
+        }
+
+        // 1. Load the Gene Data
         fetch('data.json')
             .then(res => res.json())
             .then(data => {
@@ -480,7 +513,7 @@ M9H77_33525
                 });
         }
 
-        // 2. Search Function
+        // 3. Search Function
         function performSearch() {
             const query = searchInput.value.toLowerCase().trim();
             const tbody = document.getElementById('searchTableBody');
@@ -575,7 +608,6 @@ M9H77_33525
             const proteinLen = proteinSeq !== 'Not available' && proteinSeq !== 'Protein sequence not available' ? proteinSeq.length : 0;
             const cdsLen = cdsSeq !== 'Not available' && cdsSeq !== 'CDS sequence not available' ? cdsSeq.length : 0;
             
-            // GO terms will be loaded on demand
             const goTermsHtml = '<div id="go-terms-' + item.Gene_ID + '"><p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading GO annotations...</p></div>';
             
             trSeq.innerHTML = `
@@ -619,13 +651,10 @@ M9H77_33525
             `;
             tbody.appendChild(trSeq);
             
-            // Load GO terms when row is created (lazy loading)
             loadGOForGene(item.Gene_ID);
         }
 
-        // Function to load GO terms for a specific gene
         async function loadGOForGene(geneId) {
-            // Load GO annotations file if not loaded yet
             if (!goLoaded) {
                 await loadGOAnnotations();
             }
@@ -656,7 +685,7 @@ M9H77_33525
             goTermsDiv.innerHTML = html;
         }
 
-        // 3. File Upload Handler
+        // 4. File Upload Handler
         document.getElementById('geneFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -668,7 +697,7 @@ M9H77_33525
             }
         });
 
-        // 4. GO Enrichment Analysis
+        // 5. GO Enrichment Analysis
         async function runGOAnalysis() {
             const geneListText = document.getElementById('geneListInput').value.trim();
             const pvalue = parseFloat(document.getElementById('pvalueCutoff').value);
@@ -677,12 +706,23 @@ M9H77_33525
             const resultsSection = document.getElementById('goResultsSection');
             const resultsContent = document.getElementById('goResultsContent');
             
+            // Check if on GitHub Pages
+            if (isGitHubPages) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Server Required</h5>
+                        <p>GO enrichment analysis requires a local Python server.</p>
+                        <p class="mb-0">Please see the instructions above to run this feature locally.</p>
+                    </div>
+                `;
+                return;
+            }
+            
             if (!geneListText) {
                 statusDiv.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Please enter a list of genes</div>';
                 return;
             }
             
-            // Parse gene list
             const genes = geneListText.split('\n')
                 .map(line => line.trim())
                 .filter(line => line && !line.startsWith('#'));
@@ -696,7 +736,6 @@ M9H77_33525
             resultsContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Running enrichment analysis...</p></div>';
             resultsSection.style.display = 'block';
             
-            // Ensure GO annotations are loaded
             if (!goLoaded) {
                 statusDiv.innerHTML = `<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading GO annotations first...</div>`;
                 await loadGOAnnotations();
@@ -787,7 +826,7 @@ M9H77_33525
             document.getElementById('geneFileInput').value = '';
         }
 
-        // 5. Helper Functions
+        // 6. Helper Functions
         function toggleSeq(id) {
             const row = document.getElementById('seq-' + id);
             if (row.style.display === 'table-row') {

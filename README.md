@@ -12,12 +12,13 @@ A comprehensive web-based tool for searching and analyzing Catharanthus roseus g
 
 ## Available Versions
 
-- **Cr_NP**: Canonical (NP) version (Sun, S. et al. Single-cell RNA sequencing provides a high-resolution roadmap for understanding the multicellular compartmentation of specialized metabolism. Nat. Plants 9, 179–190 (2023). https://doi.org/10.1038/s41477-022-01291-y)
-- **Cr_NCB**: (Li, C.. Single-cell multi-omics in the medicinal plant Catharanthus roseus. Nat Chem Biol 19, 1031–1041 (2023). https://doi.org/10.1038/s41589-023-01327-0)
-- **Cr_2023**: 2023 version
-- **Cr_2022**: 2022 version
-- **Cr_2016**: 2016 version
-- **Cr_2015**: 2015 version
+- **Cr_NP**: Canonical (NP) version: Sun, S. et al. Single-cell RNA sequencing provides a high-resolution roadmap for understanding the multicellular compartmentation of specialized metabolism.               Nat. Plants 9, 179–190 (2023). https://doi.org/10.1038/s41477-022-01291-y
+- **Cr_NCB**: Li, C.. Single-cell multi-omics in the medicinal plant Catharanthus roseus. Nat Chem Biol 19, 1031–1041 (2023). https://doi.org/10.1038/s41589-023-01327-0
+- **Cr_2023**: A near-complete genome assembly of Catharanthus roseus and insights into its vinblastine biosynthesis and high susceptibility to the Huanglongbing pathogen
+               Xu, Zhongping et al.Plant Communications, Volume 4, Issue 6, 100661, DOI: 10.1016/j.xplc.2023.100661.
+- **Cr_2022**: Cuello C, Stander EA, Jansen HJ, Dugé De Bernonville T, Oudin A, Birer Williams C, Lanoue A, Giglioli Guivarc'h N, Papon N, Dirks RP, Jensen MK, O'Connor SE, Besseau S,                          Courdavault V. An updated version of the Madagascar periwinkle genome. F1000Res. 2022 Dec 21;11:1541. doi: 10.12688/f1000research.129212.1. PMID: 36761838; PMCID: PMC9902796.
+- **Cr_2016**: Kellner, Franziska, et al. "Genome‐guided investigation of plant natural product biosynthesis." The Plant Journal 82.4 (2015): 680-692.
+- **Cr_2015**: Kellner F, Kim J, Clavijo BJ, Hamilton JP, Childs KL, Vaillancourt B, Cepela J, Habermann M, Steuernagel B, Clissold L, McLay K, Buell CR, O'Connor SE. Genome-guided                             investigation of plant natural product biosynthesis. Plant J. 2015 May;82(4):680-92. doi: 10.1111/tpj.12827. Epub 2015 Apr 11. Erratum in: Plant J. 2019 May;98(4):760. doi:                      10.1111/tpj.14358.    PMID: 25759247.
 
 ## Installation
 
@@ -149,7 +150,7 @@ Croseus Gene Search Tool
 Ruiqing Lyu
 KTRDC, University of Kentucky
 2026
-Available at: https://github.com/rqlyu/croseus-gene-search-tool
+Available at: https://rqlyu.github.io/search_croseus_information/
 ```
 
 ## Contact

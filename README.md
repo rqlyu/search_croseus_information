@@ -1,158 +1,163 @@
-# Croseus Gene Search Tool
+# 🧬 C. roseus Gene Database with GO Enrichment
 
-A comprehensive web-based tool for searching and analyzing Catharanthus roseus genes across multiple versions.
+Complete gene database system with integrated Gene Ontology enrichment analysis
 
-## Features
+## 🚀 Quick Start
 
-1. **Gene ID Search** - Find genes by their ID across all available versions
-2. **Sequence Search** - Search by DNA or protein sequence similarity 
-3. **Cross-Version Mapping** - See equivalent gene IDs across all versions
-4. **GO Enrichment Analysis** - Perform Gene Ontology enrichment analysis
-5. **Gene Annotations** - View detailed gene descriptions, names, and protein domains
+### 1. Install Dependencies
+```bash
+pip install --break-system-packages -r requirements.txt
+```
 
-## Available Versions
+### 2. Generate Database
+```bash
+python make_data_with_go.py
+```
 
-- **Cr_NP**: Canonical (NP) version: Sun, S. et al. Single-cell RNA sequencing provides a high-resolution roadmap for understanding the multicellular compartmentation of specialized metabolism.               Nat. Plants 9, 179–190 (2023). https://doi.org/10.1038/s41477-022-01291-y
-- **Cr_NCB**: Li, C.. Single-cell multi-omics in the medicinal plant Catharanthus roseus. Nat Chem Biol 19, 1031–1041 (2023). https://doi.org/10.1038/s41589-023-01327-0
-- **Cr_2023**: A near-complete genome assembly of Catharanthus roseus and insights into its vinblastine biosynthesis and high susceptibility to the Huanglongbing pathogen
-               Xu, Zhongping et al.Plant Communications, Volume 4, Issue 6, 100661, DOI: 10.1016/j.xplc.2023.100661.
-- **Cr_2022**: Cuello C, Stander EA, Jansen HJ, Dugé De Bernonville T, Oudin A, Birer Williams C, Lanoue A, Giglioli Guivarc'h N, Papon N, Dirks RP, Jensen MK, O'Connor SE, Besseau S,                          Courdavault V. An updated version of the Madagascar periwinkle genome. F1000Res. 2022 Dec 21;11:1541. doi: 10.12688/f1000research.129212.1. PMID: 36761838; PMCID: PMC9902796.
-- **Cr_2016**: Kellner, Franziska, et al. "Genome‐guided investigation of plant natural product biosynthesis." The Plant Journal 82.4 (2015): 680-692.
-- **Cr_2015**: Kellner F, Kim J, Clavijo BJ, Hamilton JP, Childs KL, Vaillancourt B, Cepela J, Habermann M, Steuernagel B, Clissold L, McLay K, Buell CR, O'Connor SE. Genome-guided                             investigation of plant natural product biosynthesis. Plant J. 2015 May;82(4):680-92. doi: 10.1111/tpj.12827. Epub 2015 Apr 11. Erratum in: Plant J. 2019 May;98(4):760. doi:                      10.1111/tpj.14358.    PMID: 25759247.
+### 3. Start Web Server
+```bash
+python server.py
+```
 
-## Installation
+### 4. Open Browser
+Navigate to: http://localhost:5000
 
-### Requirements
+## 📦 What's Included
+
+### Core Scripts
+- **`make_data_with_go.py`** - Generates database with GO annotations
+- **`server.py`** - Flask web server with GO enrichment API
+- **`index_complete.html`** - Web interface with gene selection
+
+### Additional Tools
+- **`go_enrichment.py`** - Standalone GO enrichment module
+- **`go_analysis_cli.py`** - Command-line GO enrichment tool
+
+### Documentation
+- **`GO_ENRICHMENT_GUIDE.md`** - Complete setup and usage guide
+- **`requirements.txt`** - Python dependencies
+- **`sample_genes.txt`** - Example gene list
+
+## 📋 Required Input Files
+
+Place these files in the same directory:
+- `Cr_Annotations_Eggo.xlsx` - Gene annotations
+- `Croseus_GO_NP.xlsx` - GO term annotations  
+- `Cr_NP.fasta` - Protein sequences
+- `Cr_NP_cds.fasta` - CDS sequences
+- `id_mapping.csv` - ID mappings (optional)
+
+## 💡 Features
+
+### Web Interface
+✅ Search genes by name, ID, or keyword
+✅ View protein and CDS sequences
+✅ Select multiple genes with checkboxes
+✅ Run GO enrichment analysis
+✅ Interactive bar chart results
+
+### Command Line Tool
+```bash
+# Run GO enrichment on gene list
+python go_analysis_cli.py sample_genes.txt
+
+# With custom parameters
+python go_analysis_cli.py sample_genes.txt --pvalue 0.01 --plot results.png
+
+# From command line
+python go_analysis_cli.py --genes M9H77_13438,M9H77_32446
+```
+
+## 📊 Example Usage
+
+### Web Interface
+1. Search for "WRKY" genes
+2. Select all results (checkbox in header)
+3. Click "Run GO Enrichment"
+4. View enriched biological processes
+
+### Command Line
+```bash
+python go_analysis_cli.py sample_genes.txt \
+    --pvalue 0.05 \
+    --qvalue 0.2 \
+    --output my_results.xlsx \
+    --plot my_plot.png
+```
+
+## 🔬 GO Enrichment
+
+Uses Fisher's exact test with Benjamini-Hochberg correction, similar to R's clusterProfiler package.
+
+**Statistical thresholds:**
+- P-value: < 0.05
+- Adjusted p-value: < 0.2
+- Minimum genes: 2
+
+## 📚 Documentation
+
+See `GO_ENRICHMENT_GUIDE.md` for:
+- Detailed setup instructions
+- Usage examples
+- Troubleshooting
+- API documentation
+- Best practices
+
+## 🛠️ System Requirements
 
 - Python 3.7+
-- Flask
-- Pandas
-- Openpyxl
-- Scipy
-- Numpy
-- SQLite3
+- 4GB RAM (8GB recommended)
+- Modern web browser
+- 500MB disk space
 
-### Setup
+## ⚡ Performance
 
-1. Install dependencies:
-```bash
-pip install flask pandas openpyxl scipy numpy
-```
+- Database: 17,000+ genes
+- GO terms: 8,500+ terms
+- Enrichment: < 1 second for 50 genes
+- Web interface: Real-time search
 
-2. Ensure your data files are in the correct location:
-```
-/mnt/user-data/uploads/
-├── Cr_NP.fasta
-├── Cr_NCB.fasta
-├── Cr_2023.fasta
-├── Cr_2022.fasta
-├── Cr_2016.fasta
-├── Cr_2015.fasta
-├── Cr_Annotations_Eggo.xlsx
-└── Croseus_GO_NP.xlsx
-```
-
-3. Run the application:
-```bash
-python3 croseus_gene_search.py
-```
-
-4. Open your browser to `http://localhost:5000`
-
-## Usage
-
-### Gene ID Search
-
-1. Select "Gene ID" as search type
-2. Enter a gene ID (e.g., `M9H77_00686`)
-3. Click "Search"
-4. View results showing:
-   - Gene IDs across all versions
-   - Protein sequence
-   - Annotations and descriptions
-   - GO terms
-
-### Sequence Search
-
-1. Select "Sequence" as search type
-2. Enter a protein sequence
-3. Set minimum similarity threshold (default 80%)
-4. Click "Search"
-5. View similar sequences with similarity scores
-
-### GO Enrichment Analysis
-
-1. Switch to "GO Enrichment" tab
-2. Enter gene IDs (one per line) from any version
-3. Click "Analyze GO Enrichment"
-4. View enriched GO terms with statistics
-
-## Data Structure
-
-The application builds a SQLite database with the following tables:
-
-- **sequences**: Stores gene sequences from all FASTA files
-- **gene_mappings**: Cross-version gene ID mappings
-- **annotations**: Gene annotations from Excel file
-- **go_terms**: GO terms for enrichment analysis
-
-## Architecture
-
-- **Backend**: Flask web framework with SQLite database
-- **Frontend**: Bootstrap 5 responsive web interface
-- **Data Processing**: Pandas for Excel files, custom FASTA parser
-- **Statistics**: Scipy for hypergeometric tests in GO enrichment
-
-## Release on GitHub
-
-To release this tool on GitHub:
-
-1. Create a new repository: `croseus-gene-search-tool`
-
-2. Repository structure:
-```
-croseus-gene-search-tool/
-├── README.md
-├── requirements.txt
-├── croseus_gene_search.py
-├── templates/
-│   └── index.html
-├── data/
-│   └── README.md (instructions for data placement)
-└── screenshots/
-    ├── search_interface.png
-    ├── gene_results.png
-    └── go_enrichment.png
-```
-
-3. Add installation and usage instructions
-
-4. Include sample data or instructions for obtaining data
-
-5. Add screenshots of the interface
-
-6. Create releases with versioning
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is released under the MIT License - see the LICENSE file for details.
-
-## Citation
-
-If you use this tool in your research, please cite:
+## 📁 File Structure
 
 ```
-Croseus Gene Search Tool
-Ruiqing Lyu
-KTRDC, University of Kentucky
-2026
-Available at: https://rqlyu.github.io/search_croseus_information/
+.
+├── make_data_with_go.py      # Data generation
+├── server.py                  # Web server
+├── index_complete.html        # Web interface
+├── go_enrichment.py           # GO module
+├── go_analysis_cli.py         # CLI tool
+├── requirements.txt           # Dependencies
+├── sample_genes.txt           # Example input
+├── GO_ENRICHMENT_GUIDE.md     # Full guide
+└── README.md                  # This file
 ```
 
-## Contact
+## 🐛 Troubleshooting
 
-For questions or support, please open an issue on GitHub.
+**"GO annotations not loaded"**
+- Check that `Croseus_GO_NP.xlsx` exists
+- Restart the server
+
+**"No significant enrichment"**
+- Need ≥2 genes
+- Try relaxing p-value cutoffs
+- Select genes with related functions
+
+**Server won't start**
+- Install missing packages: `pip install -r requirements.txt`
+- Check Python version: `python --version` (need 3.7+)
+
+## 🎯 Tips for Best Results
+
+1. Select 10-100 related genes
+2. Use genes from same pathway/family
+3. Check p.adjust < 0.05 for significance
+4. Compare across ontologies (BP/MF/CC)
+
+## 📞 Support
+
+See troubleshooting section in `GO_ENRICHMENT_GUIDE.md`
+
+---
+
+**Happy Analyzing! 🧬🔬✨**

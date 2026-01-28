@@ -46,6 +46,9 @@ def main():
     df_anno.columns = [c.strip() for c in df_anno.columns]
     df_anno = df_anno.fillna("")
 
+    print(f"   - Columns found: {df_anno.columns.tolist()}")
+    print(f"   - Total records: {len(df_anno)}")
+
     print("2. Loading ID Mappings (Other Versions)...")
     mapping_dict = {}
     if os.path.exists(MAPPING_FILE):
@@ -71,26 +74,38 @@ def main():
     
     final_data = []
     for row in records:
-        gene_id = str(row.get('Gene_ID', '')).strip()
+        # FIXED: Use 'qseqid' instead of 'Gene_ID'
+        gene_id = str(row.get('qseqid', '')).strip()
         
-        # 1. Attach Sequence
-        row['Sequence'] = seq_dict.get(gene_id, "Sequence not available")
+        # Create a standardized record with consistent field names
+        record = {
+            'Gene_ID': gene_id,  # Primary ID (qseqid)
+            'Gene_Name': str(row.get('GN', '')).strip(),  # Gene name (like CrWRKY7)
+            'Protein_Name': str(row.get('protein_name', '')).strip(),
+            'Description': str(row.get('protein_name', '')).strip(),  # Use protein_name as description
+            'Organism': str(row.get('OS', '')).strip(),
+            'Hit_DB': str(row.get('hit_db', '')).strip(),
+            'Hit_Accession': str(row.get('hit_accession', '')).strip(),
+            'E_value': row.get('evalue', ''),
+            'Percent_Identity': row.get('pident', ''),
+            'Sequence': seq_dict.get(gene_id, "Sequence not available"),
+            'Other_IDs': mapping_dict.get(gene_id, ""),
+        }
+        
+        # Include all original columns as well
+        record['_original'] = row
 
-        # 2. Attach Other Versions (New Feature)
-        # If we have a mapping, add it. If not, use empty string.
-        row['Other_IDs'] = mapping_dict.get(gene_id, "")
-
-        # 3. Ensure Description
-        if not row.get('Description'):
-            row['Description'] = row.get('Preferred_name', '')
-
-        final_data.append(row)
+        final_data.append(record)
 
     print(f"5. Saving to {OUTPUT_FILE}...")
-    with open(OUTPUT_FILE, 'w') as f:
-        json.dump(final_data, f)
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(final_data, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ Success! Database ready.")
+    print(f"✅ Success! Database ready with {len(final_data)} records.")
+    print(f"\n📊 Sample record structure:")
+    if final_data:
+        sample = {k: v for k, v in final_data[0].items() if k != '_original'}
+        print(json.dumps(sample, indent=2)[:500] + "...")
 
 if __name__ == "__main__":
     main()

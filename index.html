@@ -92,7 +92,7 @@
         
         /* GO Enrichment Section */
         .btn-go-analyze {
-            background: linear-gradient(135deg, #f5576c 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -446,10 +446,12 @@ M9H77_33525
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let db = [];
+        let goAnnotations = {};
+        let goLoaded = false;
         const searchStatus = document.getElementById('searchStatus');
         const searchInput = document.getElementById('searchInput');
 
-        // 1. Load the Data
+        // 1. Load the Gene Data (main database)
         fetch('data.json')
             .then(res => res.json())
             .then(data => {
@@ -461,6 +463,22 @@ M9H77_33525
                 console.error(err);
                 searchStatus.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading 'data.json'.</span>`;
             });
+
+        // 2. Load GO Annotations (separate file, loaded on demand)
+        function loadGOAnnotations() {
+            if (goLoaded) return Promise.resolve();
+            
+            return fetch('go_annotations.json')
+                .then(res => res.json())
+                .then(data => {
+                    goAnnotations = data;
+                    goLoaded = true;
+                    console.log('GO annotations loaded');
+                })
+                .catch(err => {
+                    console.error('Error loading GO annotations:', err);
+                });
+        }
 
         // 2. Search Function
         function performSearch() {
@@ -479,7 +497,6 @@ M9H77_33525
                     ${item.Other_IDs || ''} 
                     ${item.Description || ''} 
                     ${item.Protein_Name || ''}
-                    ${item.GO_descriptions || ''}
                     ${item.GN || ''}
                 `.toLowerCase();
                 return combinedText.includes(query);
@@ -558,21 +575,8 @@ M9H77_33525
             const proteinLen = proteinSeq !== 'Not available' && proteinSeq !== 'Protein sequence not available' ? proteinSeq.length : 0;
             const cdsLen = cdsSeq !== 'Not available' && cdsSeq !== 'CDS sequence not available' ? cdsSeq.length : 0;
             
-            let goTermsHtml = '<p class="text-muted">No GO annotations</p>';
-            if (item.GO_terms && item.GO_terms.length > 0) {
-                goTermsHtml = '<div style="max-height: 200px; overflow-y: auto;">';
-                item.GO_terms.slice(0, 10).forEach(go => {
-                    goTermsHtml += `<div class="mb-2">
-                        <span class="badge bg-secondary">${go.term}</span>
-                        <span class="small ms-2">${go.description}</span>
-                        <span class="badge bg-light text-dark ms-1">${go.ontology}</span>
-                    </div>`;
-                });
-                if (item.GO_terms.length > 10) {
-                    goTermsHtml += `<p class="text-muted small">... and ${item.GO_terms.length - 10} more</p>`;
-                }
-                goTermsHtml += '</div>';
-            }
+            // GO terms will be loaded on demand
+            const goTermsHtml = '<div id="go-terms-' + item.Gene_ID + '"><p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Loading GO annotations...</p></div>';
             
             trSeq.innerHTML = `
                 <td colspan="6">
@@ -614,6 +618,42 @@ M9H77_33525
                 </td>
             `;
             tbody.appendChild(trSeq);
+            
+            // Load GO terms when row is created (lazy loading)
+            loadGOForGene(item.Gene_ID);
+        }
+
+        // Function to load GO terms for a specific gene
+        async function loadGOForGene(geneId) {
+            // Load GO annotations file if not loaded yet
+            if (!goLoaded) {
+                await loadGOAnnotations();
+            }
+            
+            const goTermsDiv = document.getElementById('go-terms-' + geneId);
+            if (!goTermsDiv) return;
+            
+            const goTerms = goAnnotations[geneId] || [];
+            
+            if (goTerms.length === 0) {
+                goTermsDiv.innerHTML = '<p class="text-muted">No GO annotations</p>';
+                return;
+            }
+            
+            let html = '<div style="max-height: 200px; overflow-y: auto;">';
+            goTerms.slice(0, 10).forEach(go => {
+                html += `<div class="mb-2">
+                    <span class="badge bg-secondary">${go.term}</span>
+                    <span class="small ms-2">${go.description}</span>
+                    <span class="badge bg-light text-dark ms-1">${go.ontology}</span>
+                </div>`;
+            });
+            if (goTerms.length > 10) {
+                html += `<p class="text-muted small">... and ${goTerms.length - 10} more</p>`;
+            }
+            html += '</div>';
+            
+            goTermsDiv.innerHTML = html;
         }
 
         // 3. File Upload Handler
@@ -655,6 +695,12 @@ M9H77_33525
             statusDiv.innerHTML = `<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Analyzing ${genes.length} genes...</div>`;
             resultsContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Running enrichment analysis...</p></div>';
             resultsSection.style.display = 'block';
+            
+            // Ensure GO annotations are loaded
+            if (!goLoaded) {
+                statusDiv.innerHTML = `<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Loading GO annotations first...</div>`;
+                await loadGOAnnotations();
+            }
             
             try {
                 const response = await fetch('/api/go_enrichment', {

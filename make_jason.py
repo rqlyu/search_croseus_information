@@ -46,10 +46,23 @@ def load_go_annotations(go_file):
         gene_go_desc_map = defaultdict(list)
         
         for _, row in df_go.iterrows():
-            gene_id = row['Gene_ID']
-            go_term = row['GO_term']
+            # Convert to string and handle NaN values
+            gene_id = str(row['Gene_ID']).strip() if pd.notna(row['Gene_ID']) else 'Unknown'
+            go_term = str(row['GO_term']).strip() if pd.notna(row['GO_term']) else 'Unknown'
+            
+            # Convert description to string and handle NaN/None values
             description = row['Description']
+            if pd.isna(description):
+                description = 'Unknown'
+            else:
+                description = str(description).strip()
+            
+            # Convert ontology to string and handle NaN/None values
             ontology = row['Ontology']
+            if pd.isna(ontology):
+                ontology = 'Unknown'
+            else:
+                ontology = str(ontology).strip()
             
             gene_go_map[gene_id].append({
                 'term': go_term,
@@ -63,6 +76,9 @@ def load_go_annotations(go_file):
     
     except FileNotFoundError:
         print(f"   ⚠️  '{go_file}' not found. GO terms will be empty.")
+        return {}, {}
+    except Exception as e:
+        print(f"   ⚠️  Error loading GO file: {e}")
         return {}, {}
 
 def main():
@@ -113,12 +129,19 @@ def main():
     records = df_anno.to_dict(orient='records')
     
     final_data = []
-    for row in records:
+    for idx, row in enumerate(records):
+        if idx % 1000 == 0 and idx > 0:
+            print(f"   Processing record {idx}/{len(records)}...")
+        
         gene_id = str(row.get('qseqid', '')).strip()
         
         # Get GO terms for this gene
         go_terms = gene_go_map.get(gene_id, [])
         go_descriptions = gene_go_desc_map.get(gene_id, [])
+        
+        # Convert all descriptions to strings and filter out empty ones
+        # This prevents the "expected str instance, float found" error
+        go_desc_str = '; '.join([str(d) for d in go_descriptions[:5] if d and str(d).strip() and str(d) != 'nan']) if go_descriptions else ""
         
         record = {
             'Gene_ID': gene_id,
@@ -134,10 +157,10 @@ def main():
             'CDS_Sequence': cds_seq_dict.get(gene_id, "CDS sequence not available"),
             'Other_IDs': mapping_dict.get(gene_id, ""),
             
-            # NEW: GO annotations
+            # GO annotations with proper type conversion
             'GO_terms': go_terms,
             'GO_count': len(go_terms),
-            'GO_descriptions': '; '.join(go_descriptions[:5]) if go_descriptions else ""  # First 5 for search
+            'GO_descriptions': go_desc_str
         }
         
         # Backward compatibility
